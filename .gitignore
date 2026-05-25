@@ -1,0 +1,31 @@
+# Generated runtime + user state
+.codex-router/
+.codex-shim/
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+
+# Local Codex inspection artifacts (don't ship)
+*.asar
+app-asar-work/
+*-bsLDOISN.js
+hooks-settings-model-*.js
+model-queries-*.js
+normalize-model-settings-*.js
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

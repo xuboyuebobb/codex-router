@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+import json
+
+from codex_shim.catalog import catalog_entry, write_catalog, write_config
+from codex_shim.settings import FactorySettings, openrouter_settings_payload
+
+
+def test_duplicate_models_get_unique_display_slugs(tmp_path):
+    settings = tmp_path / "settings.json"
+    settings.write_text(
+        json.dumps(
+            {
+                "customModels": [
+                    {"model": "gpt-5.5", "displayName": "Fast High", "provider": "openai", "baseUrl": "http://x/v1", "index": 1},
+                    {"model": "gpt-5.5", "displayName": "Fast Low", "provider": "openai", "baseUrl": "http://x/v1", "index": 2},
+                ]
+            }
+        )
+    )
+    models = FactorySettings(settings).load()
+    assert [m.slug for m in models] == ["fast-high", "fast-low"]
+
+
+def test_catalog_preserves_context_and_visibility():
+    model = FactorySettingsFixture.one()
+    entry = catalog_entry(model)
+    assert entry["slug"] == "claude-opus"
+    assert entry["visibility"] == "list"
+    assert entry["context_window"] == 200000
+    assert "free" in entry["available_in_plans"]
+
+
+def test_openrouter_setup_payload_uses_local_key_only_in_settings():
+    payload = openrouter_settings_payload("TEST_OPENROUTER_KEY", "openrouter/auto")
+    row = payload["customModels"][0]
+    assert row["provider"] == "generic-chat-completion-api"
+    assert row["baseUrl"] == "https://openrouter.ai/api/v1"
+    assert row["apiKey"] == "TEST_OPENROUTER_KEY"
+
+
+def test_generated_catalog_and_config_do_not_contain_api_keys(tmp_path):
+    settings = tmp_path / "settings.json"
+    settings.write_text(json.dumps(openrouter_settings_payload("TEST_OPENROUTER_KEY", "openrouter/auto")))
+    models = FactorySettings(settings).load()
+
+    catalog = tmp_path / "catalog.json"
+    config = tmp_path / "config.toml"
+    write_catalog(models, catalog)
+    write_config(models, config, catalog, 8765)
+
+    generated = catalog.read_text() + "\n" + config.read_text()
+    assert "TEST_OPENROUTER_KEY" not in generated
+    assert "Authorization" not in generated
+    assert "dummy" in generated
+
+
+class FactorySettingsFixture:
+    @staticmethod
+    def one():
+        import tempfile
+        from pathlib import Path
+
+        path = Path(tempfile.mkdtemp()) / "settings.json"
+        path.write_text(
+            json.dumps(
+                {
+                    "customModels": [
+                        {
+                            "model": "claude-opus",
+                            "displayName": "Claude Opus",
+                            "provider": "anthropic",
+                            "baseUrl": "http://anthropic",
+                            "maxContextLimit": 200000,
+                        }
+                    ]
+                }
+            )
+        )
+        return FactorySettings(path).load()[0]

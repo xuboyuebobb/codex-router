@@ -1,0 +1,36 @@
+<svg width="960" height="240" viewBox="0 0 960 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Codex Router logo</title>
+  <desc id="desc">Codex Router wordmark with a rounded blue purple routing icon.</desc>
+  <defs>
+    <linearGradient id="bg" x1="76" y1="40" x2="204" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F4F7FF"/>
+      <stop offset="0.34" stop-color="#8B96FF"/>
+      <stop offset="0.68" stop-color="#5967F2"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="glyph" x1="88" y1="81" x2="169" y2="159" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.42" stop-color="#F5F7FF"/>
+      <stop offset="1" stop-color="#CFD7FF"/>
+    </linearGradient>
+    <filter id="softShadow" x="50" y="45" width="153" height="151" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#23305F" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="960" height="240" rx="32" fill="#0B0F14"/>
+  <rect x="62" y="42" width="156" height="156" rx="38" fill="url(#bg)"/>
+  <path d="M93 92C93 79.8 102.8 70 115 70H157C169.2 70 179 79.8 179 92V121C179 133.2 169.2 143 157 143H133L111.6 158.1C108 160.6 103 158 103 153.5V140.4C96.9 136.5 93 129.7 93 122V92Z" fill="url(#glyph)" filter="url(#softShadow)"/>
+  <path d="M113 101H141C149 101 152 91 162 91H167" stroke="#5E6AF2" stroke-width="9" stroke-linecap="round"/>
+  <path d="M113 120H168" stroke="#5E6AF2" stroke-width="9" stroke-linecap="round"/>
+  <path d="M113 139H140C149 139 152 150 162 150H167" stroke="#5E6AF2" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="113" cy="101" r="5.5" fill="#7782FF"/>
+  <circle cx="113" cy="120" r="5.5" fill="#7782FF"/>
+  <circle cx="113" cy="139" r="5.5" fill="#7782FF"/>
+  <circle cx="171" cy="91" r="5" fill="#7782FF"/>
+  <circle cx="172" cy="120" r="5" fill="#7782FF"/>
+  <circle cx="171" cy="150" r="5" fill="#7782FF"/>
+  <g transform="translate(272 70)">
+    <text x="0" y="52" fill="#F4F7FB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="54" font-weight="750" letter-spacing="0">Codex Router</text>
+    <text x="2" y="93" fill="#8D9AAF" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="24" font-weight="500" letter-spacing="0">Local model routing for Codex Desktop</text>
+  </g>
+</svg>

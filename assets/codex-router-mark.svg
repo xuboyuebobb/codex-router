@@ -1,0 +1,36 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Codex Router mark</title>
+  <desc id="desc">A rounded app icon with a blue purple gradient and an abstract chat route symbol.</desc>
+  <defs>
+    <linearGradient id="bg" x1="54" y1="25" x2="214" y2="226" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F4F7FF"/>
+      <stop offset="0.34" stop-color="#8B96FF"/>
+      <stop offset="0.68" stop-color="#5967F2"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="glyph" x1="70" y1="75" x2="171" y2="172" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.42" stop-color="#F5F7FF"/>
+      <stop offset="1" stop-color="#CFD7FF"/>
+    </linearGradient>
+    <filter id="softShadow" x="33" y="39" width="185" height="178" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#23305F" flood-opacity="0.28"/>
+    </filter>
+    <filter id="innerGlow" x="0" y="0" width="256" height="256" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+  </defs>
+  <rect x="18" y="18" width="220" height="220" rx="52" fill="url(#bg)"/>
+  <rect x="18" y="18" width="220" height="220" rx="52" fill="white" opacity="0.08" filter="url(#innerGlow)"/>
+  <path d="M61 89C61 71.3 75.3 57 93 57H151C168.7 57 183 71.3 183 89V130C183 147.7 168.7 162 151 162H118L86.5 184C81.2 187.7 74 183.9 74 177.4V158.7C66 153.2 61 144 61 133.6V89Z" fill="url(#glyph)" filter="url(#softShadow)"/>
+  <path d="M91 102H132C144 102 148 87 163 87H169" stroke="#5E6AF2" stroke-width="13" stroke-linecap="round"/>
+  <path d="M91 128H167" stroke="#5E6AF2" stroke-width="13" stroke-linecap="round"/>
+  <path d="M91 154H130C143 154 147 169 162 169H169" stroke="#5E6AF2" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="91" cy="102" r="8" fill="#7782FF"/>
+  <circle cx="91" cy="128" r="8" fill="#7782FF"/>
+  <circle cx="91" cy="154" r="8" fill="#7782FF"/>
+  <circle cx="174" cy="87" r="7" fill="#7782FF"/>
+  <circle cx="176" cy="128" r="7" fill="#7782FF"/>
+  <circle cx="174" cy="169" r="7" fill="#7782FF"/>
+</svg>
