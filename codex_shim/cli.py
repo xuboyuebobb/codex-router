@@ -22,6 +22,7 @@ from .settings import (
     OFFICIAL_PROVIDER_MODELS,
     openrouter_settings_payload,
     official_providers_settings_payload,
+    hermes_proxy_settings_payload,
     default_model_slug,
 )
 
@@ -62,6 +63,11 @@ def main(argv: list[str] | None = None) -> int:
     providers_setup.add_argument("--anthropic-api-key")
     providers_setup.add_argument("--deepseek-api-key")
     providers_setup.add_argument("--gemini-api-key")
+    hermes_parser = sub.add_parser("hermes", help="Configure Codex Router to use Hermes Agent's local proxy.")
+    hermes_sub = hermes_parser.add_subparsers(dest="hermes_command", required=True)
+    hermes_setup = hermes_sub.add_parser("setup")
+    hermes_setup.add_argument("--base-url", default="http://127.0.0.1:8080/v1")
+    hermes_setup.add_argument("--model", default="grok-4.3")
     sub.add_parser("generate")
     sub.add_parser("list")
     sub.add_parser("start")
@@ -94,6 +100,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "providers":
         if args.providers_command == "setup":
             setup_official_providers(args)
+            return 0
+    if args.command == "hermes":
+        if args.hermes_command == "setup":
+            setup_hermes_proxy(args.base_url, args.model)
             return 0
     if args.command == "generate":
         generate(args.settings, args.port)
@@ -191,6 +201,20 @@ def setup_official_providers(args: argparse.Namespace) -> None:
     names = ", ".join(sorted(k for k, v in api_keys.items() if v))
     print(f"Wrote local provider settings to {OPENROUTER_SETTINGS_PATH}.")
     print(f"Providers: {names}")
+    print("This file is gitignored. Do not commit it.")
+    generate(OPENROUTER_SETTINGS_PATH, DEFAULT_PORT)
+
+
+def setup_hermes_proxy(base_url: str, model: str) -> None:
+    RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+    OPENROUTER_SETTINGS_PATH.write_text(json_dumps(hermes_proxy_settings_payload(base_url=base_url, model=model)))
+    try:
+        OPENROUTER_SETTINGS_PATH.chmod(0o600)
+    except OSError:
+        pass
+    print(f"Wrote local Hermes proxy settings to {OPENROUTER_SETTINGS_PATH}.")
+    print(f"Hermes proxy: {base_url.rstrip('/')}")
+    print("Start Hermes separately with: hermes auth add xai-oauth && hermes proxy")
     print("This file is gitignored. Do not commit it.")
     generate(OPENROUTER_SETTINGS_PATH, DEFAULT_PORT)
 

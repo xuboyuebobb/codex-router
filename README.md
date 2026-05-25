@@ -94,12 +94,33 @@ provider blank to skip it. It generates:
 - `deepseek-v4-flash`
 - `gemini-3.5-flash`
 
+To use a Grok / X subscription through Hermes OAuth:
+
+```bash
+pip install --upgrade hermes-agent
+hermes auth add xai-oauth
+hermes proxy
+```
+
+Then, in another terminal:
+
+```bash
+codex-router hermes setup
+codex-router restart
+codex-router model use grok-4-3
+codex-router app .
+```
+
+This does not store your xAI OAuth token in Codex Router. Hermes owns the OAuth
+login and exposes a local OpenAI-compatible proxy at `http://127.0.0.1:8080/v1`.
+
 ## Commands
 
 ```bash
 codex-router openrouter setup     configure local OpenRouter settings
 codex-router openrouter setup --preset frontier
 codex-router providers setup      configure official provider API keys
+codex-router hermes setup         route Codex through a local Hermes proxy
 codex-router generate             regenerate catalog/config
 codex-router start                start local router daemon
 codex-router status               health check + model count

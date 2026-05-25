@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from codex_shim.catalog import catalog_entry, write_catalog, write_config
-from codex_shim.settings import FactorySettings, official_providers_settings_payload, openrouter_settings_payload
+from codex_shim.settings import FactorySettings, hermes_proxy_settings_payload, official_providers_settings_payload, openrouter_settings_payload
 
 
 def test_duplicate_models_get_unique_display_slugs(tmp_path):
@@ -89,6 +89,15 @@ def test_official_providers_payload_includes_paid_provider_models():
     assert by_model["claude-sonnet-4-6"]["provider"] == "anthropic"
     assert by_model["grok-4.3"]["baseUrl"] == "https://api.x.ai/v1"
     assert by_model["gemini-3.5-flash"]["baseUrl"] == "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+
+def test_hermes_proxy_payload_uses_dummy_local_key():
+    payload = hermes_proxy_settings_payload()
+    row = payload["customModels"][0]
+    assert row["model"] == "grok-4.3"
+    assert row["displayName"] == "Grok via Hermes OAuth"
+    assert row["baseUrl"] == "http://127.0.0.1:8080/v1"
+    assert row["apiKey"] == "dummy"
 
 
 class FactorySettingsFixture:

@@ -18,6 +18,7 @@ XAI_BASE_URL = "https://api.x.ai/v1"
 ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 GEMINI_OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+HERMES_PROXY_BASE_URL = "http://127.0.0.1:8080/v1"
 OPENROUTER_PRESETS = {
     "single": [OPENROUTER_DEFAULT_MODEL],
     "frontier": [
@@ -268,3 +269,27 @@ def official_providers_settings_payload(api_keys: dict[str, str]) -> dict[str, A
                 }
             )
     return {"customModels": entries}
+
+
+def hermes_proxy_settings_payload(
+    *,
+    base_url: str = HERMES_PROXY_BASE_URL,
+    model: str = "grok-4.3",
+) -> dict[str, Any]:
+    return {
+        "customModels": [
+            {
+                "model": model,
+                "provider": "generic-chat-completion-api",
+                "baseUrl": base_url.rstrip("/"),
+                "apiKey": "dummy",
+                "displayName": "Grok via Hermes OAuth",
+                "maxContextLimit": 1_000_000,
+                "index": 0,
+                "extraHeaders": {
+                    "HTTP-Referer": "https://github.com/xuboyuebobb/codex-router",
+                    "X-Title": "Codex Router",
+                },
+            }
+        ]
+    }
