@@ -137,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "app":
         generate(args.settings, args.port)
         ensure_started(args.settings, args.port)
-        exec_codex_app(args.settings, args.port, args.path)
+        exec_codex_app(args.settings, args.port, args.path, args.model_slug)
         return 0
     return 2
 
@@ -324,9 +324,9 @@ def exec_codex(settings_path: Path, port: int, codex_args: list[str]) -> None:
     os.execvp("codex", args)
 
 
-def exec_codex_app(settings_path: Path, port: int, path: str) -> None:
+def exec_codex_app(settings_path: Path, port: int, path: str, model_slug: str | None = None) -> None:
     _quit_codex_app()
-    args = ["codex", *_override_args(settings_path, port), "app", path]
+    args = ["codex", *_override_args(settings_path, port, model_slug), "app", path]
     subprocess.Popen(args)
     _foreground_codex_app()
 
@@ -534,10 +534,10 @@ def _remove_section(text: str, section: str) -> str:
     return "\n".join(output) + ("\n" if text.endswith("\n") else "")
 
 
-def _override_args(settings_path: Path, port: int) -> list[str]:
+def _override_args(settings_path: Path, port: int, model_slug: str | None = None) -> list[str]:
     _require_settings(settings_path)
     models = FactorySettings(settings_path).load()
-    default_slug = default_model_slug(models)
+    default_slug = _resolve_model_slug(models, model_slug)
     pairs = codex_config_overrides(CATALOG_PATH, default_slug, port)
     args: list[str] = []
     for pair in pairs:
