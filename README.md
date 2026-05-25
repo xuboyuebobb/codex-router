@@ -49,6 +49,10 @@ codex-router app .
 `.codex-router/openrouter.json`, which is gitignored. The generated Codex model
 catalog and config never include the key.
 
+`codex-router app` is opt-in for that launch. It passes temporary Codex `-c`
+overrides and does not modify `~/.codex/config.toml`. To go back to normal
+Codex, quit and open Codex normally.
+
 The default model is `openrouter/auto`. To choose another OpenRouter model:
 
 ```bash
@@ -107,9 +111,10 @@ codex-router stop                 stop daemon
 codex-router restart              restart daemon
 codex-router list                 list generated model slugs
 codex-router model list           list usable Codex picker slugs
-codex-router model use <slug>     set the Desktop default model
+codex-router model use <slug>     persist Router as the Desktop default model
 codex-router app [path]           launch Codex Desktop through the router
 codex-router codex -- <args>      run Codex CLI through the router
+codex-router disable              remove persisted Router config
 ```
 
 `codex-shim` remains as a compatibility alias while the fork migrates.

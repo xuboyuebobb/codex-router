@@ -137,7 +137,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "app":
         generate(args.settings, args.port)
         ensure_started(args.settings, args.port)
-        install_codex_config(args.settings, args.port, args.model_slug)
         exec_codex_app(args.settings, args.port, args.path)
         return 0
     return 2
@@ -327,7 +326,7 @@ def exec_codex(settings_path: Path, port: int, codex_args: list[str]) -> None:
 
 def exec_codex_app(settings_path: Path, port: int, path: str) -> None:
     _quit_codex_app()
-    args = ["codex", "app", path]
+    args = ["codex", *_override_args(settings_path, port), "app", path]
     subprocess.Popen(args)
     _foreground_codex_app()
 
