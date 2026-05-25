@@ -170,6 +170,8 @@ class FactorySettings:
         matches = [m for m in models if m.model == requested]
         if len(matches) == 1:
             return matches[0]
+        if requested in {"gpt-5.5", "default"} and len(models) == 1:
+            return models[0]
         return None
 
 

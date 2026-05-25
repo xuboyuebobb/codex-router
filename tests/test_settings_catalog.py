@@ -91,6 +91,25 @@ def test_official_providers_payload_includes_paid_provider_models():
     assert by_model["gemini-3.5-flash"]["baseUrl"] == "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
+def test_single_model_settings_route_codex_default_to_configured_model(tmp_path):
+    settings = tmp_path / "settings.json"
+    settings.write_text(
+        json.dumps(
+            official_providers_settings_payload(
+                {
+                    "xai": "TEST_XAI_KEY",
+                    "anthropic": "",
+                    "deepseek": "",
+                    "gemini": "",
+                }
+            )
+        )
+    )
+    loaded = FactorySettings(settings)
+    assert loaded.by_slug_or_model("gpt-5.5").model == "grok-4.3"
+    assert loaded.by_slug_or_model("default").model == "grok-4.3"
+
+
 class FactorySettingsFixture:
     @staticmethod
     def one():
