@@ -39,6 +39,19 @@ def test_openrouter_setup_payload_uses_local_key_only_in_settings():
     assert row["apiKey"] == "TEST_OPENROUTER_KEY"
 
 
+def test_openrouter_frontier_preset_includes_priority_models():
+    payload = openrouter_settings_payload("TEST_OPENROUTER_KEY", preset="frontier")
+    models = [row["model"] for row in payload["customModels"]]
+    assert models[:5] == [
+        "x-ai/grok-4.3",
+        "x-ai/grok-build-0.1",
+        "~anthropic/claude-sonnet-latest",
+        "deepseek/deepseek-v3.2",
+        "deepseek/deepseek-r1",
+    ]
+    assert all(row["apiKey"] == "TEST_OPENROUTER_KEY" for row in payload["customModels"])
+
+
 def test_generated_catalog_and_config_do_not_contain_api_keys(tmp_path):
     settings = tmp_path / "settings.json"
     settings.write_text(json.dumps(openrouter_settings_payload("TEST_OPENROUTER_KEY", "openrouter/auto")))

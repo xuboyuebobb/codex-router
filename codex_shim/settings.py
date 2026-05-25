@@ -14,6 +14,17 @@ DEFAULT_PORT = 8765
 PROVIDER_NAME = "codex_router"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_DEFAULT_MODEL = "openrouter/auto"
+OPENROUTER_PRESETS = {
+    "single": [OPENROUTER_DEFAULT_MODEL],
+    "frontier": [
+        "x-ai/grok-4.3",
+        "x-ai/grok-build-0.1",
+        "~anthropic/claude-sonnet-latest",
+        "deepseek/deepseek-v3.2",
+        "deepseek/deepseek-r1",
+        OPENROUTER_DEFAULT_MODEL,
+    ],
+}
 
 
 def slugify(value: str) -> str:
@@ -134,20 +145,58 @@ def default_model_slug(models: list[FactoryModel]) -> str:
     return models[0].slug
 
 
-def openrouter_settings_payload(api_key: str, model: str = OPENROUTER_DEFAULT_MODEL) -> dict[str, Any]:
+def openrouter_settings_payload(
+    api_key: str,
+    model: str = OPENROUTER_DEFAULT_MODEL,
+    *,
+    preset: str = "single",
+) -> dict[str, Any]:
+    models = OPENROUTER_PRESETS.get(preset)
+    if models is None:
+        models = [model]
+    if preset == "single":
+        models = [model]
     return {
         "customModels": [
-            {
-                "model": model,
-                "provider": "generic-chat-completion-api",
-                "baseUrl": OPENROUTER_BASE_URL,
-                "apiKey": api_key,
-                "displayName": f"OpenRouter {model}",
-                "maxContextLimit": 128000,
-                "extraHeaders": {
-                    "HTTP-Referer": "https://github.com/bobxu/codex-router",
-                    "X-Title": "Codex Router",
-                },
-            }
+            _openrouter_model_entry(index, api_key, model_id)
+            for index, model_id in enumerate(models)
         ]
     }
+
+
+def _openrouter_model_entry(index: int, api_key: str, model: str) -> dict[str, Any]:
+    return {
+        "model": model,
+        "provider": "generic-chat-completion-api",
+        "baseUrl": OPENROUTER_BASE_URL,
+        "apiKey": api_key,
+        "displayName": _openrouter_display_name(model),
+        "maxContextLimit": _openrouter_context_limit(model),
+        "index": index,
+        "extraHeaders": {
+            "HTTP-Referer": "https://github.com/xuboyuebobb/codex-router",
+            "X-Title": "Codex Router",
+        },
+    }
+
+
+def _openrouter_display_name(model: str) -> str:
+    names = {
+        "x-ai/grok-4.3": "Grok 4.3",
+        "x-ai/grok-build-0.1": "Grok Build",
+        "~anthropic/claude-sonnet-latest": "Claude Sonnet Latest",
+        "deepseek/deepseek-v3.2": "DeepSeek V3.2",
+        "deepseek/deepseek-r1": "DeepSeek R1",
+        "openrouter/auto": "OpenRouter Auto",
+    }
+    return names.get(model, f"OpenRouter {model}")
+
+
+def _openrouter_context_limit(model: str) -> int:
+    if model.startswith("~anthropic/claude-sonnet") or model == "x-ai/grok-4.3":
+        return 1_000_000
+    if model == "x-ai/grok-build-0.1":
+        return 256_000
+    if model.startswith("deepseek/"):
+        return 164_000
+    return 128_000

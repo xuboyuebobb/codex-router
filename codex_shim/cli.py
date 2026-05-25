@@ -18,6 +18,7 @@ from .settings import (
     DEFAULT_PORT,
     FactorySettings,
     OPENROUTER_DEFAULT_MODEL,
+    OPENROUTER_PRESETS,
     openrouter_settings_payload,
     default_model_slug,
 )
@@ -46,6 +47,12 @@ def main(argv: list[str] | None = None) -> int:
     setup_parser = openrouter_sub.add_parser("setup")
     setup_parser.add_argument("--api-key", help="OpenRouter API key. If omitted, prompts without echo.")
     setup_parser.add_argument("--model", default=OPENROUTER_DEFAULT_MODEL)
+    setup_parser.add_argument(
+        "--preset",
+        choices=sorted(OPENROUTER_PRESETS),
+        default="single",
+        help="Model set to generate. Use 'frontier' for Grok, Claude, DeepSeek, and OpenRouter Auto.",
+    )
     sub.add_parser("generate")
     sub.add_parser("list")
     sub.add_parser("start")
@@ -73,7 +80,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "openrouter":
         if args.openrouter_command == "setup":
-            setup_openrouter(args.api_key, args.model)
+            setup_openrouter(args.api_key, args.model, args.preset)
             return 0
     if args.command == "generate":
         generate(args.settings, args.port)
@@ -135,18 +142,19 @@ def generate(settings_path: Path, port: int) -> None:
     print("No files under ~/.codex were modified.")
 
 
-def setup_openrouter(api_key: str | None, model: str) -> None:
+def setup_openrouter(api_key: str | None, model: str, preset: str) -> None:
     key = api_key or os.environ.get("OPENROUTER_API_KEY") or getpass.getpass("OpenRouter API key: ")
     key = key.strip()
     if not key:
         raise SystemExit("OpenRouter API key is required.")
     RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
-    OPENROUTER_SETTINGS_PATH.write_text(json_dumps(openrouter_settings_payload(key, model)))
+    OPENROUTER_SETTINGS_PATH.write_text(json_dumps(openrouter_settings_payload(key, model, preset=preset)))
     try:
         OPENROUTER_SETTINGS_PATH.chmod(0o600)
     except OSError:
         pass
     print(f"Wrote local OpenRouter settings to {OPENROUTER_SETTINGS_PATH}.")
+    print(f"Preset: {preset}")
     print("This file is gitignored. Do not commit it.")
     generate(OPENROUTER_SETTINGS_PATH, DEFAULT_PORT)
 

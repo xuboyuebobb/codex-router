@@ -56,10 +56,32 @@ codex-router openrouter setup --model <openrouter-model-id>
 codex-router restart
 ```
 
+For a ready-to-use Grok + Claude + DeepSeek setup:
+
+```bash
+codex-router openrouter setup --preset frontier
+codex-router restart
+codex-router list
+```
+
+That preset generates:
+
+- `x-ai/grok-4.3`
+- `x-ai/grok-build-0.1`
+- `~anthropic/claude-sonnet-latest`
+- `deepseek/deepseek-v3.2`
+- `deepseek/deepseek-r1`
+- `openrouter/auto`
+
+Grok consumer subscriptions on X / Grok.com are separate from API access. Codex
+Router needs OpenRouter credits or an API key path, not a consumer subscription
+quota.
+
 ## Commands
 
 ```bash
 codex-router openrouter setup     configure local OpenRouter settings
+codex-router openrouter setup --preset frontier
 codex-router generate             regenerate catalog/config
 codex-router start                start local router daemon
 codex-router status               health check + model count
