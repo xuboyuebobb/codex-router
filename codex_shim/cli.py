@@ -19,7 +19,9 @@ from .settings import (
     FactorySettings,
     OPENROUTER_DEFAULT_MODEL,
     OPENROUTER_PRESETS,
+    OFFICIAL_PROVIDER_MODELS,
     openrouter_settings_payload,
+    official_providers_settings_payload,
     default_model_slug,
 )
 
@@ -53,6 +55,13 @@ def main(argv: list[str] | None = None) -> int:
         default="single",
         help="Model set to generate. Use 'frontier' for Grok, Claude, DeepSeek, and OpenRouter Auto.",
     )
+    providers_parser = sub.add_parser("providers", help="Configure Codex Router with official provider API keys.")
+    providers_sub = providers_parser.add_subparsers(dest="providers_command", required=True)
+    providers_setup = providers_sub.add_parser("setup")
+    providers_setup.add_argument("--xai-api-key")
+    providers_setup.add_argument("--anthropic-api-key")
+    providers_setup.add_argument("--deepseek-api-key")
+    providers_setup.add_argument("--gemini-api-key")
     sub.add_parser("generate")
     sub.add_parser("list")
     sub.add_parser("start")
@@ -81,6 +90,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "openrouter":
         if args.openrouter_command == "setup":
             setup_openrouter(args.api_key, args.model, args.preset)
+            return 0
+    if args.command == "providers":
+        if args.providers_command == "setup":
+            setup_official_providers(args)
             return 0
     if args.command == "generate":
         generate(args.settings, args.port)
@@ -157,6 +170,37 @@ def setup_openrouter(api_key: str | None, model: str, preset: str) -> None:
     print(f"Preset: {preset}")
     print("This file is gitignored. Do not commit it.")
     generate(OPENROUTER_SETTINGS_PATH, DEFAULT_PORT)
+
+
+def setup_official_providers(args: argparse.Namespace) -> None:
+    api_keys = {
+        "xai": _provider_key(args.xai_api_key, "XAI_API_KEY", "xAI API key for Grok"),
+        "anthropic": _provider_key(args.anthropic_api_key, "ANTHROPIC_API_KEY", "Anthropic API key for Claude"),
+        "deepseek": _provider_key(args.deepseek_api_key, "DEEPSEEK_API_KEY", "DeepSeek API key"),
+        "gemini": _provider_key(args.gemini_api_key, "GEMINI_API_KEY", "Gemini API key"),
+    }
+    payload = official_providers_settings_payload(api_keys)
+    if not payload["customModels"]:
+        raise SystemExit("No provider API keys were supplied.")
+    RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+    OPENROUTER_SETTINGS_PATH.write_text(json_dumps(payload))
+    try:
+        OPENROUTER_SETTINGS_PATH.chmod(0o600)
+    except OSError:
+        pass
+    names = ", ".join(sorted(k for k, v in api_keys.items() if v))
+    print(f"Wrote local provider settings to {OPENROUTER_SETTINGS_PATH}.")
+    print(f"Providers: {names}")
+    print("This file is gitignored. Do not commit it.")
+    generate(OPENROUTER_SETTINGS_PATH, DEFAULT_PORT)
+
+
+def _provider_key(value: str | None, env_name: str, prompt: str) -> str:
+    value = value or os.environ.get(env_name)
+    if value is not None:
+        return value.strip()
+    entered = getpass.getpass(f"{prompt} (leave blank to skip): ")
+    return entered.strip()
 
 
 def install_codex_config(settings_path: Path, port: int, model_slug: str | None = None) -> None:

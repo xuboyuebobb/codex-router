@@ -14,6 +14,10 @@ DEFAULT_PORT = 8765
 PROVIDER_NAME = "codex_router"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_DEFAULT_MODEL = "openrouter/auto"
+XAI_BASE_URL = "https://api.x.ai/v1"
+ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1"
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+GEMINI_OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 OPENROUTER_PRESETS = {
     "single": [OPENROUTER_DEFAULT_MODEL],
     "frontier": [
@@ -25,6 +29,45 @@ OPENROUTER_PRESETS = {
         OPENROUTER_DEFAULT_MODEL,
     ],
 }
+OFFICIAL_PROVIDER_MODELS = [
+    {
+        "key": "xai",
+        "env": "XAI_API_KEY",
+        "provider": "generic-chat-completion-api",
+        "baseUrl": XAI_BASE_URL,
+        "models": [
+            ("grok-4.3", "Grok 4.3", 1_000_000),
+        ],
+    },
+    {
+        "key": "anthropic",
+        "env": "ANTHROPIC_API_KEY",
+        "provider": "anthropic",
+        "baseUrl": ANTHROPIC_BASE_URL,
+        "models": [
+            ("claude-sonnet-4-6", "Claude Sonnet 4.6", 1_000_000),
+        ],
+    },
+    {
+        "key": "deepseek",
+        "env": "DEEPSEEK_API_KEY",
+        "provider": "generic-chat-completion-api",
+        "baseUrl": DEEPSEEK_BASE_URL,
+        "models": [
+            ("deepseek-v4-pro", "DeepSeek V4 Pro", 164_000),
+            ("deepseek-v4-flash", "DeepSeek V4 Flash", 164_000),
+        ],
+    },
+    {
+        "key": "gemini",
+        "env": "GEMINI_API_KEY",
+        "provider": "generic-chat-completion-api",
+        "baseUrl": GEMINI_OPENAI_BASE_URL,
+        "models": [
+            ("gemini-3.5-flash", "Gemini 3.5 Flash", 1_048_576),
+        ],
+    },
+]
 
 
 def slugify(value: str) -> str:
@@ -200,3 +243,28 @@ def _openrouter_context_limit(model: str) -> int:
     if model.startswith("deepseek/"):
         return 164_000
     return 128_000
+
+
+def official_providers_settings_payload(api_keys: dict[str, str]) -> dict[str, Any]:
+    entries: list[dict[str, Any]] = []
+    for provider in OFFICIAL_PROVIDER_MODELS:
+        key = api_keys.get(provider["key"], "").strip()
+        if not key:
+            continue
+        for model, display_name, context_limit in provider["models"]:
+            entries.append(
+                {
+                    "model": model,
+                    "provider": provider["provider"],
+                    "baseUrl": provider["baseUrl"],
+                    "apiKey": key,
+                    "displayName": display_name,
+                    "maxContextLimit": context_limit,
+                    "index": len(entries),
+                    "extraHeaders": {
+                        "HTTP-Referer": "https://github.com/xuboyuebobb/codex-router",
+                        "X-Title": "Codex Router",
+                    },
+                }
+            )
+    return {"customModels": entries}

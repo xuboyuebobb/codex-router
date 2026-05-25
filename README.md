@@ -77,11 +77,29 @@ Grok consumer subscriptions on X / Grok.com are separate from API access. Codex
 Router needs OpenRouter credits or an API key path, not a consumer subscription
 quota.
 
+To use official provider API keys directly:
+
+```bash
+codex-router providers setup
+codex-router restart
+codex-router list
+```
+
+That command prompts for xAI, Anthropic, DeepSeek, and Gemini API keys. Leave a
+provider blank to skip it. It generates:
+
+- `grok-4.3`
+- `claude-sonnet-4-6`
+- `deepseek-v4-pro`
+- `deepseek-v4-flash`
+- `gemini-3.5-flash`
+
 ## Commands
 
 ```bash
 codex-router openrouter setup     configure local OpenRouter settings
 codex-router openrouter setup --preset frontier
+codex-router providers setup      configure official provider API keys
 codex-router generate             regenerate catalog/config
 codex-router start                start local router daemon
 codex-router status               health check + model count

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from codex_shim.catalog import catalog_entry, write_catalog, write_config
-from codex_shim.settings import FactorySettings, openrouter_settings_payload
+from codex_shim.settings import FactorySettings, official_providers_settings_payload, openrouter_settings_payload
 
 
 def test_duplicate_models_get_unique_display_slugs(tmp_path):
@@ -66,6 +66,29 @@ def test_generated_catalog_and_config_do_not_contain_api_keys(tmp_path):
     assert "TEST_OPENROUTER_KEY" not in generated
     assert "Authorization" not in generated
     assert "dummy" in generated
+
+
+def test_official_providers_payload_includes_paid_provider_models():
+    payload = official_providers_settings_payload(
+        {
+            "xai": "TEST_XAI_KEY",
+            "anthropic": "TEST_ANTHROPIC_KEY",
+            "deepseek": "TEST_DEEPSEEK_KEY",
+            "gemini": "TEST_GEMINI_KEY",
+        }
+    )
+    models = [row["model"] for row in payload["customModels"]]
+    assert models == [
+        "grok-4.3",
+        "claude-sonnet-4-6",
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "gemini-3.5-flash",
+    ]
+    by_model = {row["model"]: row for row in payload["customModels"]}
+    assert by_model["claude-sonnet-4-6"]["provider"] == "anthropic"
+    assert by_model["grok-4.3"]["baseUrl"] == "https://api.x.ai/v1"
+    assert by_model["gemini-3.5-flash"]["baseUrl"] == "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
 class FactorySettingsFixture:
