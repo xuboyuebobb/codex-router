@@ -98,12 +98,27 @@ provider blank to skip it. It generates:
 - `deepseek-v4-flash`
 - `gemini-3.5-flash`
 
+To make Codex Router selectable inside the normal Codex Desktop UI:
+
+```bash
+codex-router ui-enable
+```
+
+Then open Codex normally and use the bottom model picker to switch between
+official Codex models and Codex Router models. To remove the UI registration:
+
+```bash
+codex-router ui-disable
+```
+
 ## Commands
 
 ```bash
 codex-router openrouter setup     configure local OpenRouter settings
 codex-router openrouter setup --preset frontier
 codex-router providers setup      configure official provider API keys
+codex-router ui-enable            register Router in the normal Codex UI
+codex-router ui-disable           remove Router from the normal Codex UI
 codex-router generate             regenerate catalog/config
 codex-router start                start local router daemon
 codex-router status               health check + model count

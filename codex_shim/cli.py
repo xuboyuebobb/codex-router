@@ -66,8 +66,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("list")
     sub.add_parser("start")
     sub.add_parser("enable")
+    sub.add_parser("ui-enable", help="Register Codex Router in the desktop UI without changing the default model.")
     sub.add_parser("stop")
     sub.add_parser("disable")
+    sub.add_parser("ui-disable", help="Remove Codex Router UI registration.")
     sub.add_parser("restart")
     sub.add_parser("status")
     sub.add_parser("patch-app", help="Patch Codex Desktop model dropdown to allow custom catalog models.")
@@ -106,8 +108,13 @@ def main(argv: list[str] | None = None) -> int:
         if code == 0 and args.command == "enable":
             install_codex_config(args.settings, args.port)
         return code
-    if args.command in {"stop", "disable"}:
-        if args.command == "disable":
+    if args.command == "ui-enable":
+        generate(args.settings, args.port)
+        ensure_started(args.settings, args.port)
+        install_codex_ui_switch_config(args.settings, args.port)
+        return 0
+    if args.command in {"stop", "disable", "ui-disable"}:
+        if args.command in {"disable", "ui-disable"}:
             restore_codex_config()
         return stop()
     if args.command == "restart":
@@ -217,6 +224,24 @@ def install_codex_config(settings_path: Path, port: int, model_slug: str | None 
     top_block, provider_block = _managed_config_blocks(default_slug, port)
     CODEX_CONFIG_PATH.write_text(top_block + "\n" + cleaned.lstrip() + "\n" + provider_block)
     print(f"Installed Codex Router config into {CODEX_CONFIG_PATH}.")
+    print(f"Original backup: {CODEX_CONFIG_BACKUP_PATH}")
+
+
+def install_codex_ui_switch_config(settings_path: Path, port: int) -> None:
+    FactorySettings(settings_path).load()
+    CODEX_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+    original = CODEX_CONFIG_PATH.read_text() if CODEX_CONFIG_PATH.exists() else ""
+    if MANAGED_BEGIN not in original and not CODEX_CONFIG_BACKUP_PATH.exists():
+        CODEX_CONFIG_BACKUP_PATH.write_text(original)
+    cleaned = _remove_managed_config(original)
+    cleaned = _remove_top_level_keys(cleaned, {"model_catalog_json"})
+    cleaned = _remove_section(cleaned, "model_providers.factory_byok_shim")
+    cleaned = _remove_section(cleaned, "model_providers.codex_router")
+    catalog_block, provider_block = _managed_ui_switch_config_blocks(port)
+    CODEX_CONFIG_PATH.write_text(catalog_block + "\n" + cleaned.lstrip() + "\n" + provider_block)
+    print(f"Registered Codex Router in {CODEX_CONFIG_PATH}.")
+    print("Default Codex model/provider were left unchanged.")
     print(f"Original backup: {CODEX_CONFIG_BACKUP_PATH}")
 
 
@@ -491,6 +516,26 @@ stream_idle_timeout_ms = 600000
 {MANAGED_END}
 '''
     return top_block, provider_block
+
+
+def _managed_ui_switch_config_blocks(port: int) -> tuple[str, str]:
+    catalog_block = f'''{MANAGED_BEGIN}
+model_catalog_json = "{CATALOG_PATH}"
+{MANAGED_END}
+'''
+
+    provider_block = f'''{MANAGED_BEGIN}
+[model_providers.codex_router]
+name = "Codex Router"
+base_url = "http://127.0.0.1:{port}/v1"
+wire_api = "responses"
+experimental_bearer_token = "dummy"
+request_max_retries = 3
+stream_max_retries = 3
+stream_idle_timeout_ms = 600000
+{MANAGED_END}
+'''
+    return catalog_block, provider_block
 
 
 def _remove_managed_config(text: str) -> str:
